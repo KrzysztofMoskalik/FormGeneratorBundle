@@ -6,7 +6,7 @@ use Codete\FormGeneratorBundle\Annotations as Form;
 
 /**
  * @Form\Form(
- *   default = { "person", "employee" }
+ *   default = { "person", "anonymous", "employee" }
  * )
  */
 class SimpleParent
@@ -23,9 +23,18 @@ class SimpleParent
     /**
      * @Form\Embed(
      *   class = "Codete\FormGeneratorBundle\Tests\Model\Person",
+     *   context = {
+     *     "no_photo" = "true"
+     *   }
+     * )
+     */
+    public $anonymous;
+
+    /**
+     * @Form\Embed(
+     *   class = "Codete\FormGeneratorBundle\Tests\Model\Person",
      *   view = "work"
      * )
      */
     public $employee;
-
 }

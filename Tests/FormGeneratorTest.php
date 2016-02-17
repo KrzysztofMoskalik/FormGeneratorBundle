@@ -2,8 +2,29 @@
 
 namespace Codete\FormGeneratorBundle\Tests;
 
+use Codete\FormGeneratorBundle\Form\Type\EmbedType;
+use Codete\FormGeneratorBundle\Tests\FormConfigurationModifier\NoPhotoPersonModifier;
+use Codete\FormGeneratorBundle\Tests\Model\SimpleParent;
+use Symfony\Component\Form\PreloadedExtension;
+
 class FormGeneratorTest extends BaseTest
 {
+    /**
+     * @var PreloadedExtension
+     */
+    protected $embedTypeExtension;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $embedType = new EmbedType($this->formGenerator);
+
+        $this->embedTypeExtension = new PreloadedExtension(array(
+            $embedType->getName() => $embedType,
+        ), array());
+    }
+
     /**
      * @dataProvider provideDefaultForm
      */
@@ -200,5 +221,17 @@ class FormGeneratorTest extends BaseTest
         if ($additionalCheck !== null) {
             $additionalCheck($this, $form);
         }
+    }
+
+    public function testEmbedForms()
+    {
+        $fb = $this->formFactoryBuilder->addExtension($this->embedTypeExtension)->getFormFactory()->createBuilder();
+        $this->formGenerator->addFormConfigurationModifier(new NoPhotoPersonModifier());
+        $this->formGenerator->populateFormBuilder($fb, new SimpleParent());
+        $form = $fb->getForm();
+        $this->assertEquals(count(array('person', 'anonymous', 'employee')), count($form));
+        $this->assertEquals(count(array('title', 'name', 'surname', 'photo', 'active', 'salary')), $form->get('person')->count());
+        $this->assertEquals(count(array('title', 'name', 'surname', 'active', 'salary')), $form->get('anonymous')->count());
+        $this->assertEquals(count(array('salary')), $form->get('employee')->count());
     }
 }
